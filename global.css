@@ -1,0 +1,37 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/**
+ * Semantic color tokens (RGB channels) — referenced in tailwind.config.js.
+ * `.dark` is toggled by NativeWind when using `darkMode: 'class'` + `setColorScheme`.
+ */
+@layer base {
+  :root {
+    --color-background: 248 250 252;
+    --color-foreground: 15 23 42;
+    --color-card: 255 255 255;
+    --color-card-foreground: 15 23 42;
+    --color-muted: 241 245 249;
+    --color-muted-foreground: 100 116 139;
+    --color-border: 226 232 240;
+    --color-primary: 14 165 233;
+    --color-primary-foreground: 255 255 255;
+    --color-destructive: 239 68 68;
+    --color-destructive-foreground: 255 255 255;
+  }
+
+  .dark {
+    --color-background: 2 6 23;
+    --color-foreground: 248 250 252;
+    --color-card: 15 23 42;
+    --color-card-foreground: 248 250 252;
+    --color-muted: 30 41 59;
+    --color-muted-foreground: 148 163 184;
+    --color-border: 51 65 85;
+    --color-primary: 56 189 248;
+    --color-primary-foreground: 2 6 23;
+    --color-destructive: 248 113 113;
+    --color-destructive-foreground: 2 6 23;
+  }
+}
