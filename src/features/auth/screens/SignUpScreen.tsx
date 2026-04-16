@@ -47,7 +47,8 @@ export function SignUpScreen({ onBackToLogin, onSignedUp }: Props) {
   return (
     <KeyboardAvoidingView
       className="flex-1 bg-white dark:bg-background"
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+    >
       <StatusBar
         barStyle={resolved === 'dark' ? 'light-content' : 'dark-content'}
       />
@@ -58,7 +59,8 @@ export function SignUpScreen({ onBackToLogin, onSignedUp }: Props) {
           paddingBottom: Math.max(insets.bottom, 24),
           paddingHorizontal: 24,
         }}
-        showsVerticalScrollIndicator={false}>
+        showsVerticalScrollIndicator={false}
+      >
         <Pressable onPress={onBackToLogin} className="mb-4 self-start py-2">
           <Text className="text-base text-primary">← Back</Text>
         </Pressable>
@@ -103,9 +105,7 @@ export function SignUpScreen({ onBackToLogin, onSignedUp }: Props) {
             secureTextEntry={!showPw}
             className="flex-1 px-4 py-3.5 text-base text-foreground"
           />
-          <Pressable
-            onPress={() => setShowPw((s) => !s)}
-            className="px-4 py-3">
+          <Pressable onPress={() => setShowPw(s => !s)} className="px-4 py-3">
             <Text className="text-lg text-muted-foreground">
               {showPw ? '🙈' : '👁'}
             </Text>
@@ -124,9 +124,7 @@ export function SignUpScreen({ onBackToLogin, onSignedUp }: Props) {
             secureTextEntry={!showCf}
             className="flex-1 px-4 py-3.5 text-base text-foreground"
           />
-          <Pressable
-            onPress={() => setShowCf((s) => !s)}
-            className="px-4 py-3">
+          <Pressable onPress={() => setShowCf(s => !s)} className="px-4 py-3">
             <Text className="text-lg text-muted-foreground">
               {showCf ? '🙈' : '👁'}
             </Text>
@@ -136,20 +134,26 @@ export function SignUpScreen({ onBackToLogin, onSignedUp }: Props) {
         <Pressable
           accessibilityRole="checkbox"
           accessibilityState={{ checked: agreed }}
-          onPress={() => setAgreed((a) => !a)}
-          className="mt-8 flex-row items-start gap-3">
+          onPress={() => setAgreed(a => !a)}
+          className="mt-8 flex-row items-start gap-3"
+        >
           <View
             className={`mt-0.5 h-5 w-5 items-center justify-center rounded border-2 ${
-              agreed ? 'border-primary bg-primary' : 'border-border'
-            }`}>
+              agreed ? 'border-primary bg-green-600 ' : 'border-border'
+            }`}
+          >
             {agreed ? (
-              <Text className="text-xs font-bold text-primary-foreground">✓</Text>
+              <Text className="text-xs font-bold text-primary-foreground">
+                ✓
+              </Text>
             ) : null}
           </View>
           <Text className="flex-1 text-sm leading-5 text-muted-foreground">
             I&apos;ve read and agree with the{' '}
-            <Text className="font-medium text-primary">Terms and Conditions</Text>
-            {' '}and the{' '}
+            <Text className="font-medium text-primary">
+              Terms and Conditions
+            </Text>{' '}
+            and the{' '}
             <Text className="font-medium text-primary">Privacy Policy</Text>
           </Text>
         </Pressable>
@@ -158,13 +162,15 @@ export function SignUpScreen({ onBackToLogin, onSignedUp }: Props) {
           accessibilityRole="button"
           disabled={!canSubmit}
           className={`mt-8 items-center rounded-xl py-4 ${
-            canSubmit ? 'bg-primary active:opacity-90' : 'bg-muted'
+            canSubmit ? 'bg-green-600  active:opacity-90' : 'bg-muted'
           }`}
-          onPress={submit}>
+          onPress={submit}
+        >
           <Text
             className={`text-base font-semibold ${
               canSubmit ? 'text-primary-foreground' : 'text-muted-foreground'
-            }`}>
+            }`}
+          >
             Create account
           </Text>
         </Pressable>

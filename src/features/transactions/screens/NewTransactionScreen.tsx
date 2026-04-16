@@ -31,6 +31,9 @@ type GroupSelection =
   | { kind: 'builtin'; key: BuiltinGroupKey }
   | { kind: 'custom'; id: string };
 
+const TRANSACTION_STATUS_OPTIONS = ['income', 'expense', 'saving'] as const;
+type TransactionStatus = (typeof TRANSACTION_STATUS_OPTIONS)[number];
+
 type Props = {
   visible: boolean;
   onClose: () => void;
@@ -59,19 +62,20 @@ export function NewTransactionScreen({ visible, onClose }: Props) {
   const { t } = useI18n();
   const resolvedTheme = useResolvedColorScheme();
   const insets = useSafeAreaInsets();
-  const languagePreference = useLocaleStore((s) => s.languagePreference);
+  const languagePreference = useLocaleStore(s => s.languagePreference);
   const appLang = useMemo(
     () => resolveAppLanguage(languagePreference),
     [languagePreference],
   );
 
-  const localeTag = appLang === 'vi' ? 'vi-VN' : appLang === 'ja' ? 'ja-JP' : 'en-US';
+  const localeTag =
+    appLang === 'vi' ? 'vi-VN' : appLang === 'ja' ? 'ja-JP' : 'en-US';
 
-  const types = useTransactionTypeStore((s) => s.types);
-  const addType = useTransactionTypeStore((s) => s.addType);
-  const removeType = useTransactionTypeStore((s) => s.removeType);
-  const userGroups = useTransactionGroupStore((s) => s.groups);
-  const addTransaction = useTransactionsStore((s) => s.add);
+  const types = useTransactionTypeStore(s => s.types);
+  const addType = useTransactionTypeStore(s => s.addType);
+  const removeType = useTransactionTypeStore(s => s.removeType);
+  const userGroups = useTransactionGroupStore(s => s.groups);
+  const addTransaction = useTransactionsStore(s => s.add);
 
   const [groupSel, setGroupSel] = useState<GroupSelection | null>(null);
   const [title, setTitle] = useState('');
@@ -80,6 +84,7 @@ export function NewTransactionScreen({ visible, onClose }: Props) {
   const [dueDate, setDueDate] = useState(() => new Date());
   const [note, setNote] = useState('');
   const [typeId, setTypeId] = useState<string | null>(null);
+  const [status, setStatus] = useState<TransactionStatus>('expense');
 
   const [groupOpen, setGroupOpen] = useState(false);
   const [typeOpen, setTypeOpen] = useState(false);
@@ -96,6 +101,7 @@ export function NewTransactionScreen({ visible, onClose }: Props) {
     setDueDate(new Date());
     setNote('');
     setTypeId(null);
+    setStatus('expense');
   };
 
   const handleClose = () => {
@@ -136,6 +142,7 @@ export function NewTransactionScreen({ visible, onClose }: Props) {
       dueDateIso: dueDate.toISOString(),
       note: note.trim(),
       typeId,
+      status,
     });
 
     reset();
@@ -152,12 +159,12 @@ export function NewTransactionScreen({ visible, onClose }: Props) {
     if (groupSel.kind === 'builtin') {
       return groupLabelBuiltin(groupSel.key);
     }
-    return userGroups.find((g) => g.id === groupSel.id)?.name ?? '—';
+    return userGroups.find(g => g.id === groupSel.id)?.name ?? '—';
   })();
   const selectedTypeName =
     typeId === null
       ? t('newTransaction.noneType')
-      : types.find((x) => x.id === typeId)?.name ?? t('newTransaction.noneType');
+      : types.find(x => x.id === typeId)?.name ?? t('newTransaction.noneType');
 
   const dateStr = dueDate.toLocaleDateString(localeTag, {
     day: '2-digit',
@@ -174,14 +181,19 @@ export function NewTransactionScreen({ visible, onClose }: Props) {
       visible={visible}
       animationType="slide"
       presentationStyle="fullScreen"
-      onRequestClose={handleClose}>
+      onRequestClose={handleClose}
+    >
       <KeyboardAvoidingView
         className="flex-1 bg-slate-100 dark:bg-[#070b14]"
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      >
         <StatusBar
           barStyle={resolvedTheme === 'dark' ? 'light-content' : 'dark-content'}
         />
-        <View style={{ paddingTop: Math.max(insets.top, 12) }} className="px-5 pb-3">
+        <View
+          style={{ paddingTop: Math.max(insets.top, 12) }}
+          className="px-5 pb-3"
+        >
           <Text className="text-center text-xl font-bold text-slate-900 dark:text-white">
             {t('newTransaction.title')}
           </Text>
@@ -190,18 +202,21 @@ export function NewTransactionScreen({ visible, onClose }: Props) {
         <ScrollView
           className="flex-1 px-5"
           keyboardShouldPersistTaps="handled"
-          contentContainerStyle={{ paddingBottom: 24 }}>
+          contentContainerStyle={{ paddingBottom: 24 }}
+        >
           <View className="mb-4">
             <FieldLabel required>{t('newTransaction.selectGroup')}</FieldLabel>
             <Pressable
               onPress={() => setGroupOpen(true)}
-              className={`${inputClassName()} flex-row items-center justify-between`}>
+              className={`${inputClassName()} flex-row items-center justify-between`}
+            >
               <Text
                 className={
                   groupSel
                     ? 'text-slate-900 dark:text-white'
                     : 'text-slate-400 dark:text-slate-500'
-                }>
+                }
+              >
                 {selectedGroupText ?? t('newTransaction.select')}
               </Text>
               <Text className="text-slate-400">⌄</Text>
@@ -232,13 +247,43 @@ export function NewTransactionScreen({ visible, onClose }: Props) {
           </View>
 
           <View className="mb-4">
+            <FieldLabel required>
+              {t('newTransaction.transactionStatus')}
+            </FieldLabel>
+            <View className="flex-row flex-wrap gap-2">
+              {TRANSACTION_STATUS_OPTIONS.map(option => (
+                <Pressable
+                  key={option}
+                  onPress={() => setStatus(option)}
+                  className={`rounded-full border px-3 py-2 ${
+                    status === option
+                      ? 'border-teal-600 bg-teal-600'
+                      : 'border-slate-300 bg-white dark:border-white/20 dark:bg-[#121a2b]'
+                  }`}
+                >
+                  <Text
+                    className={`text-sm font-semibold ${
+                      status === option
+                        ? 'text-white'
+                        : 'text-slate-700 dark:text-white'
+                    }`}
+                  >
+                    {t(`transactionStatus.${option}`)}
+                  </Text>
+                </Pressable>
+              ))}
+            </View>
+          </View>
+
+          <View className="mb-4">
             <FieldLabel>{t('newTransaction.transactionType')}</FieldLabel>
             <Text className="mb-2 text-xs text-slate-500 dark:text-slate-400">
               {t('newTransaction.typeOptionalHint')}
             </Text>
             <Pressable
               onPress={() => setTypeOpen(true)}
-              className={`${inputClassName()} flex-row items-center justify-between`}>
+              className={`${inputClassName()} flex-row items-center justify-between`}
+            >
               <Text className="flex-1 text-slate-900 dark:text-white">
                 {selectedTypeName}
               </Text>
@@ -246,7 +291,8 @@ export function NewTransactionScreen({ visible, onClose }: Props) {
             </Pressable>
             <Pressable
               onPress={() => setManageTypesOpen(true)}
-              className="mt-2 self-start active:opacity-80">
+              className="mt-2 self-start active:opacity-80"
+            >
               <Text className="text-sm font-medium text-primary">
                 {t('newTransaction.manageTypes')}
               </Text>
@@ -272,7 +318,8 @@ export function NewTransactionScreen({ visible, onClose }: Props) {
                   ? setIosDateOpen(true)
                   : setShowAndroidDate(true)
               }
-              className={`${inputClassName()} flex-row items-center justify-between`}>
+              className={`${inputClassName()} flex-row items-center justify-between`}
+            >
               <Text className="text-slate-900 dark:text-white">{dateStr}</Text>
               <Text className="text-lg">📅</Text>
             </Pressable>
@@ -308,14 +355,16 @@ export function NewTransactionScreen({ visible, onClose }: Props) {
           <View className="flex-row gap-3 pb-8">
             <Pressable
               onPress={handleClose}
-              className="flex-1 items-center rounded-xl bg-red-500 py-4 active:opacity-90">
+              className="flex-1 items-center rounded-xl bg-red-500 py-4 active:opacity-90"
+            >
               <Text className="font-bold text-white">
                 {t('newTransaction.cancel')}
               </Text>
             </Pressable>
             <Pressable
               onPress={save}
-              className="flex-1 items-center rounded-xl bg-primary py-4 active:opacity-90">
+              className="flex-1 items-center rounded-xl bg-green-600  py-4 active:opacity-90"
+            >
               <Text className="font-bold text-primary-foreground">
                 {t('newTransaction.save')}
               </Text>
@@ -327,27 +376,29 @@ export function NewTransactionScreen({ visible, onClose }: Props) {
       <Modal visible={groupOpen} transparent animationType="fade">
         <Pressable
           className="flex-1 justify-end bg-black/50"
-          onPress={() => setGroupOpen(false)}>
+          onPress={() => setGroupOpen(false)}
+        >
           <Pressable
             className="rounded-t-3xl bg-card"
-            onPress={(e) => e.stopPropagation()}
-            style={{ paddingBottom: insets.bottom }}>
+            onPress={e => e.stopPropagation()}
+            style={{ paddingBottom: insets.bottom }}
+          >
             <Text className="border-b border-border px-4 py-3 text-center text-lg font-semibold text-card-foreground">
               {t('newTransaction.selectGroup')}
             </Text>
             <FlatList
               data={[
-                ...BUILTIN_GROUP_KEYS.map((key) => ({
+                ...BUILTIN_GROUP_KEYS.map(key => ({
                   kind: 'builtin' as const,
                   key,
                 })),
-                ...userGroups.map((g) => ({
+                ...userGroups.map(g => ({
                   kind: 'custom' as const,
                   id: g.id,
                   name: g.name,
                 })),
               ]}
-              keyExtractor={(item) =>
+              keyExtractor={item =>
                 item.kind === 'builtin' ? `b-${item.key}` : `c-${item.id}`
               }
               renderItem={({ item }) => (
@@ -360,7 +411,8 @@ export function NewTransactionScreen({ visible, onClose }: Props) {
                     }
                     setGroupOpen(false);
                   }}
-                  className="border-b border-border px-4 py-4 active:bg-muted/50">
+                  className="border-b border-border px-4 py-4 active:bg-muted/50"
+                >
                   <Text className="text-base text-card-foreground">
                     {item.kind === 'builtin'
                       ? groupLabelBuiltin(item.key)
@@ -376,11 +428,13 @@ export function NewTransactionScreen({ visible, onClose }: Props) {
       <Modal visible={typeOpen} transparent animationType="fade">
         <Pressable
           className="flex-1 justify-end bg-black/50"
-          onPress={() => setTypeOpen(false)}>
+          onPress={() => setTypeOpen(false)}
+        >
           <Pressable
             className="max-h-[70%] rounded-t-3xl bg-card"
-            onPress={(e) => e.stopPropagation()}
-            style={{ paddingBottom: insets.bottom }}>
+            onPress={e => e.stopPropagation()}
+            style={{ paddingBottom: insets.bottom }}
+          >
             <Text className="border-b border-border px-4 py-3 text-center text-lg font-semibold text-card-foreground">
               {t('newTransaction.transactionType')}
             </Text>
@@ -389,22 +443,26 @@ export function NewTransactionScreen({ visible, onClose }: Props) {
                 setTypeId(null);
                 setTypeOpen(false);
               }}
-              className="border-b border-border px-4 py-4 active:bg-muted/50">
+              className="border-b border-border px-4 py-4 active:bg-muted/50"
+            >
               <Text className="text-base text-card-foreground">
                 {t('newTransaction.noneType')}
               </Text>
             </Pressable>
             <FlatList
               data={types}
-              keyExtractor={(x) => x.id}
+              keyExtractor={x => x.id}
               renderItem={({ item }) => (
                 <Pressable
                   onPress={() => {
                     setTypeId(item.id);
                     setTypeOpen(false);
                   }}
-                  className="border-b border-border px-4 py-4 active:bg-muted/50">
-                  <Text className="text-base text-card-foreground">{item.name}</Text>
+                  className="border-b border-border px-4 py-4 active:bg-muted/50"
+                >
+                  <Text className="text-base text-card-foreground">
+                    {item.name}
+                  </Text>
                 </Pressable>
               )}
               ListEmptyComponent={
@@ -420,11 +478,13 @@ export function NewTransactionScreen({ visible, onClose }: Props) {
       <Modal visible={iosDateOpen} transparent animationType="fade">
         <Pressable
           className="flex-1 justify-end bg-black/50"
-          onPress={() => setIosDateOpen(false)}>
+          onPress={() => setIosDateOpen(false)}
+        >
           <Pressable
             className="rounded-t-3xl bg-card px-4 pt-3"
-            onPress={(e) => e.stopPropagation()}
-            style={{ paddingBottom: insets.bottom }}>
+            onPress={e => e.stopPropagation()}
+            style={{ paddingBottom: insets.bottom }}
+          >
             <DateTimePicker
               value={dueDate}
               mode="date"
@@ -437,8 +497,9 @@ export function NewTransactionScreen({ visible, onClose }: Props) {
               }}
             />
             <Pressable
-              className="mb-2 items-center rounded-xl bg-primary py-3 active:opacity-90"
-              onPress={() => setIosDateOpen(false)}>
+              className="mb-2 items-center rounded-xl bg-green-600  py-3 active:opacity-90"
+              onPress={() => setIosDateOpen(false)}
+            >
               <Text className="font-semibold text-primary-foreground">
                 {t('settings.done')}
               </Text>
@@ -450,10 +511,12 @@ export function NewTransactionScreen({ visible, onClose }: Props) {
       <Modal visible={manageTypesOpen} transparent animationType="fade">
         <Pressable
           className="flex-1 justify-center bg-black/50 px-4"
-          onPress={() => setManageTypesOpen(false)}>
+          onPress={() => setManageTypesOpen(false)}
+        >
           <Pressable
             className="rounded-2xl bg-card p-4"
-            onPress={(e) => e.stopPropagation()}>
+            onPress={e => e.stopPropagation()}
+          >
             <Text className="text-lg font-bold text-card-foreground">
               {t('newTransaction.manageTypes')}
             </Text>
@@ -470,7 +533,8 @@ export function NewTransactionScreen({ visible, onClose }: Props) {
                   addType(newTypeName);
                   setNewTypeName('');
                 }}
-                className="justify-center rounded-xl bg-primary px-4 active:opacity-90">
+                className="justify-center rounded-xl bg-green-600  px-4 active:opacity-90"
+              >
                 <Text className="font-semibold text-primary-foreground">
                   {t('newTransaction.addType')}
                 </Text>
@@ -479,7 +543,7 @@ export function NewTransactionScreen({ visible, onClose }: Props) {
             <FlatList
               className="mt-4 max-h-48"
               data={types}
-              keyExtractor={(x) => x.id}
+              keyExtractor={x => x.id}
               renderItem={({ item }) => (
                 <View className="flex-row items-center justify-between border-b border-border py-3">
                   <Text className="text-card-foreground">{item.name}</Text>
@@ -496,7 +560,8 @@ export function NewTransactionScreen({ visible, onClose }: Props) {
             />
             <Pressable
               className="mt-4 items-center rounded-xl bg-muted py-3"
-              onPress={() => setManageTypesOpen(false)}>
+              onPress={() => setManageTypesOpen(false)}
+            >
               <Text className="font-semibold text-foreground">
                 {t('settings.close')}
               </Text>

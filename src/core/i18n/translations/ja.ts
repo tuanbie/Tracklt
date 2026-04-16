@@ -19,9 +19,20 @@ export const ja: TranslationTree = {
       notifications: '通知',
       appearance: '外観',
       language: '言語',
+      currency: '通貨',
       privacy: 'プライバシーとセキュリティ',
       storage: 'ストレージ',
     },
+  },
+  currency: {
+    eur: 'ユーロ (EUR)',
+    usd: '米ドル (USD)',
+    vnd: 'ベトナムドン (VND)',
+  },
+  transactionStatus: {
+    income: '入金',
+    expense: '出金',
+    saving: '貯蓄',
   },
   theme: {
     system: '端末に合わせる',
@@ -50,9 +61,18 @@ export const ja: TranslationTree = {
     manageGroupsTitle: '取引グループ',
     manageGroupsHint:
       '作成したグループは、新規取引の「取引グループを選択」に表示されます。',
+    currencyLabel: '通貨',
+    filterByStatus: 'ステータス',
+    filterByType: 'タイプ',
+    filterByDate: '日付',
+    filterDateAll: '全て',
+    filterDateMonth: '今月',
+    filterDateYear: '今年',
+    noTransactionsYet: '取引はまだありません。上のボタンから追加してください。',
     newGroupPlaceholder: '新しいグループ名',
     addGroupButton: '追加',
-    noCustomGroupsYet: 'カスタムグループはまだありません。上で追加してください。',
+    noCustomGroupsYet:
+      'カスタムグループはまだありません。上で追加してください。',
     deletedGroup: '削除済みグループ',
   },
   wallet: {
@@ -67,8 +87,7 @@ export const ja: TranslationTree = {
     title: 'インサイト',
     statistics: '統計',
     savingsPlan: '貯蓄プラン',
-    savingsPlaceholder:
-      '貯蓄プラン — 目標と定期振替は今後追加予定です。',
+    savingsPlaceholder: '貯蓄プラン — 目標と定期振替は今後追加予定です。',
     totalSpendings: '支出合計',
     income: '入金',
     outcome: '出金',
@@ -110,7 +129,8 @@ export const ja: TranslationTree = {
       'Google Sign-In のネイティブモジュールがありません。pod install 後にアプリを再ビルドしてください。',
     errorSignInDeveloper:
       'OAuth 設定が一致していません（Android: Google Cloud に SHA-1 を追加、iOS: URL スキームとバンドル ID）。Google Cloud Console を確認してください。',
-    errorSignInNetwork: 'ネットワークエラーです。接続を確認して再試行してください。',
+    errorSignInNetwork:
+      'ネットワークエラーです。接続を確認して再試行してください。',
     errorSignInScopes:
       'Google Drive の権限が取得できませんでした。Google Cloud で Drive API を有効にし、OAuth 同意画面にスコープを追加してください。',
     errorSignInUnknown: 'Google サインインに失敗しました。',
@@ -135,8 +155,7 @@ export const ja: TranslationTree = {
     guest: 'ゲスト',
     totalSavings: '貯蓄合計',
     signedUp: '登録日: 2021年12月12日',
-    savingsFootnote:
-      '実績のおかげで、イタリアで一週間の休暇を楽しめます。',
+    savingsFootnote: '実績のおかげで、イタリアで一週間の休暇を楽しめます。',
   },
   newTransaction: {
     title: '新規取引',
@@ -147,6 +166,7 @@ export const ja: TranslationTree = {
     dueDate: '期限',
     note: 'メモ',
     transactionType: '取引タイプ',
+    transactionStatus: '取引ステータス',
     typeOptionalHint: '任意 — 事前に作成したタイプを選ぶか空欄',
     noneType: 'なし',
     manageTypes: 'タイプを管理',

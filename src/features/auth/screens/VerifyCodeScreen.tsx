@@ -51,13 +51,18 @@ export function VerifyCodeScreen({ email, onContinue }: Props) {
   return (
     <KeyboardAvoidingView
       className="flex-1 bg-white dark:bg-background"
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+    >
       <StatusBar
         barStyle={resolved === 'dark' ? 'light-content' : 'dark-content'}
       />
       <View
         className="flex-1 px-6"
-        style={{ paddingTop: Math.max(insets.top, 16), paddingBottom: insets.bottom }}>
+        style={{
+          paddingTop: Math.max(insets.top, 16),
+          paddingBottom: insets.bottom,
+        }}
+      >
         <Text className="text-2xl font-bold text-foreground">
           Enter confirmation code
         </Text>
@@ -72,10 +77,8 @@ export function VerifyCodeScreen({ email, onContinue }: Props) {
               key={i}
               ref={refs[i]}
               value={d}
-              onChangeText={(t) => setAt(i, t)}
-              onKeyPress={({ nativeEvent }) =>
-                onKeyPress(i, nativeEvent.key)
-              }
+              onChangeText={t => setAt(i, t)}
+              onKeyPress={({ nativeEvent }) => onKeyPress(i, nativeEvent.key)}
               keyboardType="number-pad"
               maxLength={1}
               selectTextOnFocus
@@ -85,7 +88,9 @@ export function VerifyCodeScreen({ email, onContinue }: Props) {
         </View>
 
         <Pressable className="mt-8 self-center" accessibilityRole="link">
-          <Text className="text-base font-medium text-primary">Resend code</Text>
+          <Text className="text-base font-medium text-primary">
+            Resend code
+          </Text>
         </Pressable>
 
         <View className="flex-1" />
@@ -94,13 +99,15 @@ export function VerifyCodeScreen({ email, onContinue }: Props) {
           accessibilityRole="button"
           disabled={!complete}
           className={`mb-4 items-center rounded-xl py-4 ${
-            complete ? 'bg-primary active:opacity-90' : 'bg-muted'
+            complete ? 'bg-green-600  active:opacity-90' : 'bg-muted'
           }`}
-          onPress={onContinue}>
+          onPress={onContinue}
+        >
           <Text
             className={`text-base font-semibold ${
               complete ? 'text-primary-foreground' : 'text-muted-foreground'
-            }`}>
+            }`}
+          >
             Continue
           </Text>
         </Pressable>

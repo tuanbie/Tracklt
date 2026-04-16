@@ -50,7 +50,7 @@ export function HomeScreen() {
           </Text>
           <Pressable
             accessibilityRole="button"
-            className="mt-4 items-center rounded-lg bg-primary py-3 active:opacity-90"
+            className="mt-4 items-center rounded-lg bg-green-600  py-3 active:opacity-90"
             onPress={() => setPreference(cycleThemePreference(preference))}
           >
             <Text className="font-medium text-primary-foreground">

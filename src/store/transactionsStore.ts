@@ -2,6 +2,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 
+export type TransactionStatus = 'income' | 'expense' | 'saving';
+
 export type SavedTransaction = {
   id: string;
   groupKey: string;
@@ -11,6 +13,7 @@ export type SavedTransaction = {
   dueDateIso: string;
   note: string;
   typeId: string | null;
+  status: TransactionStatus;
   createdAt: string;
 };
 
@@ -25,10 +28,10 @@ type State = {
 
 export const useTransactionsStore = create<State>()(
   persist(
-    (set) => ({
+    set => ({
       items: [],
-      add: (payload) =>
-        set((s) => ({
+      add: payload =>
+        set(s => ({
           items: [
             {
               ...payload,

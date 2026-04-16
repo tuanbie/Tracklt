@@ -22,14 +22,17 @@ export function DriveBackupPromptModal({
       visible={visible}
       transparent
       animationType="fade"
-      onRequestClose={onDismiss}>
+      onRequestClose={onDismiss}
+    >
       <Pressable
         className="flex-1 justify-center bg-black/50 px-6"
-        onPress={onDismiss}>
+        onPress={onDismiss}
+      >
         <Pressable
           className="rounded-2xl bg-card p-6"
-          onPress={(e) => e.stopPropagation()}
-          style={{ marginBottom: insets.bottom }}>
+          onPress={e => e.stopPropagation()}
+          style={{ marginBottom: insets.bottom }}
+        >
           <Text className="text-center text-lg font-bold text-card-foreground">
             {t('drive.prompt5Title')}
           </Text>
@@ -37,18 +40,20 @@ export function DriveBackupPromptModal({
             {t('drive.prompt5Body')}
           </Text>
           <Pressable
-            className="mt-6 items-center rounded-xl bg-primary py-3 active:opacity-90"
+            className="mt-6 items-center rounded-xl bg-green-600  py-3 active:opacity-90"
             onPress={() => {
               onDismiss();
               onOpenSettings();
-            }}>
+            }}
+          >
             <Text className="font-semibold text-primary-foreground">
               {t('drive.prompt5OpenSettings')}
             </Text>
           </Pressable>
           <Pressable
             className="mt-3 items-center py-2 active:opacity-80"
-            onPress={onDismiss}>
+            onPress={onDismiss}
+          >
             <Text className="text-base text-muted-foreground">
               {t('drive.prompt5Later')}
             </Text>

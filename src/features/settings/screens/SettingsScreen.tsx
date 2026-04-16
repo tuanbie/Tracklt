@@ -28,9 +28,10 @@ import {
 import { useAuthStore } from '../../../store/authStore';
 import { useDriveSyncStore } from '../../../store/driveSyncStore';
 import {
-  useThemeStore,
-  type ThemePreference,
-} from '../../../store/themeStore';
+  useLocaleStore,
+  type CurrencyPreference,
+} from '../../../store/localeStore';
+import { useThemeStore, type ThemePreference } from '../../../store/themeStore';
 
 const MENU_KEYS = [
   'savedMessages',
@@ -39,6 +40,7 @@ const MENU_KEYS = [
   'notifications',
   'appearance',
   'language',
+  'currency',
   'privacy',
   'storage',
 ] as const;
@@ -62,11 +64,14 @@ function MenuRow({
       accessibilityRole="button"
       disabled={!onPress}
       onPress={onPress}
-      className="flex-row items-center justify-between border-b border-border py-4 active:bg-muted/30">
+      className="flex-row items-center justify-between border-b border-border py-4 active:bg-muted/30"
+    >
       <View className="flex-1 pr-2">
         <Text className="text-[17px] text-foreground">{label}</Text>
         {subtitle ? (
-          <Text className="mt-0.5 text-sm text-muted-foreground">{subtitle}</Text>
+          <Text className="mt-0.5 text-sm text-muted-foreground">
+            {subtitle}
+          </Text>
         ) : null}
       </View>
       <Text className="text-lg text-muted-foreground">›</Text>
@@ -74,10 +79,7 @@ function MenuRow({
   );
 }
 
-function labelForTheme(
-  p: ThemePreference,
-  t: (key: string) => string,
-): string {
+function labelForTheme(p: ThemePreference, t: (key: string) => string): string {
   switch (p) {
     case 'system':
       return t('theme.system');
@@ -100,19 +102,38 @@ function labelForLanguagePref(
   return t(`language.${pref}`);
 }
 
+function labelForCurrencyPref(
+  pref: CurrencyPreference,
+  t: (key: string) => string,
+): string {
+  switch (pref) {
+    case 'EUR':
+      return t('currency.eur');
+    case 'USD':
+      return t('currency.usd');
+    case 'VND':
+      return t('currency.vnd');
+    default:
+      return pref;
+  }
+}
+
 export function SettingsScreen({ onLogout, onClose }: Props) {
   const { t, languagePreference, setLanguagePreference } = useI18n();
-  const displayName = useAuthStore((s) => s.displayName);
-  const username = useAuthStore((s) => s.username);
-  const isGuest = useAuthStore((s) => s.isGuest);
-  const themePreference = useThemeStore((s) => s.preference);
-  const setThemePreference = useThemeStore((s) => s.setPreference);
-  const driveLinked = useDriveSyncStore((s) => s.linked);
-  const linkedEmail = useDriveSyncStore((s) => s.linkedEmail);
-  const unlinkDriveStore = useDriveSyncStore((s) => s.unlink);
+  const displayName = useAuthStore(s => s.displayName);
+  const username = useAuthStore(s => s.username);
+  const isGuest = useAuthStore(s => s.isGuest);
+  const themePreference = useThemeStore(s => s.preference);
+  const setThemePreference = useThemeStore(s => s.setPreference);
+  const currencyPreference = useLocaleStore(s => s.currencyPreference);
+  const setCurrencyPreference = useLocaleStore(s => s.setCurrencyPreference);
+  const driveLinked = useDriveSyncStore(s => s.linked);
+  const linkedEmail = useDriveSyncStore(s => s.linkedEmail);
+  const unlinkDriveStore = useDriveSyncStore(s => s.unlink);
   const [showLogout, setShowLogout] = useState(false);
   const [appearanceOpen, setAppearanceOpen] = useState(false);
   const [languageOpen, setLanguageOpen] = useState(false);
+  const [currencyOpen, setCurrencyOpen] = useState(false);
   const [driveBusy, setDriveBusy] = useState(false);
   const insets = useSafeAreaInsets();
   const resolved = useResolvedColorScheme();
@@ -206,8 +227,7 @@ export function SettingsScreen({ onLogout, onClose }: Props) {
     ]);
   };
 
-  const statusBarStyle =
-    resolved === 'dark' ? 'light-content' : 'dark-content';
+  const statusBarStyle = resolved === 'dark' ? 'light-content' : 'dark-content';
 
   return (
     <View className="flex-1 bg-background">
@@ -217,10 +237,12 @@ export function SettingsScreen({ onLogout, onClose }: Props) {
         contentContainerStyle={{
           paddingBottom: 24,
         }}
-        showsVerticalScrollIndicator={false}>
+        showsVerticalScrollIndicator={false}
+      >
         <View
           className="flex-row items-center justify-between px-4"
-          style={{ paddingTop: Math.max(insets.top, 8) }}>
+          style={{ paddingTop: Math.max(insets.top, 8) }}
+        >
           {onClose ? <View className="w-14" /> : null}
           <Text className="flex-1 text-center text-[17px] font-semibold text-foreground">
             {t('settings.title')}
@@ -229,7 +251,8 @@ export function SettingsScreen({ onLogout, onClose }: Props) {
             <Pressable
               accessibilityRole="button"
               onPress={onClose}
-              className="w-14 items-end py-1 active:opacity-80">
+              className="w-14 items-end py-1 active:opacity-80"
+            >
               <Text className="text-base font-semibold text-primary">
                 {t('settings.done')}
               </Text>
@@ -248,7 +271,8 @@ export function SettingsScreen({ onLogout, onClose }: Props) {
             </View>
             <Pressable
               accessibilityLabel="Edit profile photo"
-              className="absolute -bottom-0.5 -right-0.5 h-9 w-9 items-center justify-center rounded-full border-[3px] border-background bg-primary active:opacity-90">
+              className="absolute -bottom-0.5 -right-0.5 h-9 w-9 items-center justify-center rounded-full border-[3px] border-background bg-green-600  active:opacity-90"
+            >
               <Text className="text-sm text-primary-foreground">✎</Text>
             </Pressable>
           </View>
@@ -282,7 +306,8 @@ export function SettingsScreen({ onLogout, onClose }: Props) {
                 accessibilityRole="button"
                 disabled={driveBusy}
                 onPress={linkDrive}
-                className="border-b border-border px-4 py-4 active:bg-muted/30">
+                className="border-b border-border px-4 py-4 active:bg-muted/30"
+              >
                 <Text className="text-[17px] font-medium text-primary">
                   {t('drive.linkButton')}
                 </Text>
@@ -293,7 +318,8 @@ export function SettingsScreen({ onLogout, onClose }: Props) {
                   accessibilityRole="button"
                   disabled={driveBusy}
                   onPress={syncNow}
-                  className="border-b border-border px-4 py-4 active:bg-muted/30">
+                  className="border-b border-border px-4 py-4 active:bg-muted/30"
+                >
                   <Text className="text-[17px] font-medium text-primary">
                     {t('drive.syncNow')}
                   </Text>
@@ -302,7 +328,8 @@ export function SettingsScreen({ onLogout, onClose }: Props) {
                   accessibilityRole="button"
                   disabled={driveBusy}
                   onPress={confirmUnlinkDrive}
-                  className="px-4 py-4 active:bg-muted/30">
+                  className="px-4 py-4 active:bg-muted/30"
+                >
                   <Text className="text-[17px] font-medium text-destructive">
                     {t('drive.unlink')}
                   </Text>
@@ -316,7 +343,7 @@ export function SettingsScreen({ onLogout, onClose }: Props) {
         </View>
 
         <View className="mt-8 px-4">
-          {MENU_KEYS.map((key) => {
+          {MENU_KEYS.map(key => {
             const label = t(`settings.menu.${key}`);
             if (key === 'appearance') {
               return (
@@ -338,6 +365,16 @@ export function SettingsScreen({ onLogout, onClose }: Props) {
                 />
               );
             }
+            if (key === 'currency') {
+              return (
+                <MenuRow
+                  key={key}
+                  label={label}
+                  subtitle={labelForCurrencyPref(currencyPreference, t)}
+                  onPress={() => setCurrencyOpen(true)}
+                />
+              );
+            }
             return <MenuRow key={key} label={label} />;
           })}
         </View>
@@ -345,7 +382,8 @@ export function SettingsScreen({ onLogout, onClose }: Props) {
         <Pressable
           accessibilityRole="button"
           className="mx-6 mt-6 items-center rounded-xl py-3 active:opacity-80"
-          onPress={() => setShowLogout(true)}>
+          onPress={() => setShowLogout(true)}
+        >
           <Text className="text-base font-medium text-destructive">
             {t('settings.logOut')}
           </Text>
@@ -356,18 +394,21 @@ export function SettingsScreen({ onLogout, onClose }: Props) {
         visible={appearanceOpen}
         transparent
         animationType="fade"
-        onRequestClose={() => setAppearanceOpen(false)}>
+        onRequestClose={() => setAppearanceOpen(false)}
+      >
         <Pressable
           className="flex-1 justify-end bg-black/50"
-          onPress={() => setAppearanceOpen(false)}>
+          onPress={() => setAppearanceOpen(false)}
+        >
           <Pressable
             className="rounded-t-3xl border-t border-border bg-card px-4 pt-2 pb-6"
-            onPress={(e) => e.stopPropagation()}
-            style={{ paddingBottom: Math.max(insets.bottom, 16) }}>
+            onPress={e => e.stopPropagation()}
+            style={{ paddingBottom: Math.max(insets.bottom, 16) }}
+          >
             <Text className="mb-4 text-center text-lg font-semibold text-card-foreground">
               {t('settings.appearanceTitle')}
             </Text>
-            {(['system', 'light', 'dark'] as const).map((p) => (
+            {(['system', 'light', 'dark'] as const).map(p => (
               <Pressable
                 key={p}
                 accessibilityRole="button"
@@ -375,7 +416,8 @@ export function SettingsScreen({ onLogout, onClose }: Props) {
                   setThemePreference(p);
                   setAppearanceOpen(false);
                 }}
-                className="flex-row items-center justify-between border-b border-border py-4 active:opacity-80">
+                className="flex-row items-center justify-between border-b border-border py-4 active:opacity-80"
+              >
                 <Text className="text-[17px] text-card-foreground">
                   {labelForTheme(p, t)}
                 </Text>
@@ -386,7 +428,8 @@ export function SettingsScreen({ onLogout, onClose }: Props) {
             ))}
             <Pressable
               className="mt-3 items-center rounded-xl bg-muted py-3 active:opacity-90"
-              onPress={() => setAppearanceOpen(false)}>
+              onPress={() => setAppearanceOpen(false)}
+            >
               <Text className="font-semibold text-foreground">
                 {t('settings.close')}
               </Text>
@@ -399,18 +442,21 @@ export function SettingsScreen({ onLogout, onClose }: Props) {
         visible={languageOpen}
         transparent
         animationType="fade"
-        onRequestClose={() => setLanguageOpen(false)}>
+        onRequestClose={() => setLanguageOpen(false)}
+      >
         <Pressable
           className="flex-1 justify-end bg-black/50"
-          onPress={() => setLanguageOpen(false)}>
+          onPress={() => setLanguageOpen(false)}
+        >
           <Pressable
             className="rounded-t-3xl border-t border-border bg-card px-4 pt-2 pb-6"
-            onPress={(e) => e.stopPropagation()}
-            style={{ paddingBottom: Math.max(insets.bottom, 16) }}>
+            onPress={e => e.stopPropagation()}
+            style={{ paddingBottom: Math.max(insets.bottom, 16) }}
+          >
             <Text className="mb-4 text-center text-lg font-semibold text-card-foreground">
               {t('settings.languageTitle')}
             </Text>
-            {(['system', 'en', 'vi', 'ja'] as const).map((p) => (
+            {(['system', 'en', 'vi', 'ja'] as const).map(p => (
               <Pressable
                 key={p}
                 accessibilityRole="button"
@@ -418,7 +464,8 @@ export function SettingsScreen({ onLogout, onClose }: Props) {
                   setLanguagePreference(p);
                   setLanguageOpen(false);
                 }}
-                className="flex-row items-center justify-between border-b border-border py-4 active:opacity-80">
+                className="flex-row items-center justify-between border-b border-border py-4 active:opacity-80"
+              >
                 <Text className="text-[17px] text-card-foreground">
                   {labelForLanguagePref(p, t)}
                 </Text>
@@ -429,7 +476,56 @@ export function SettingsScreen({ onLogout, onClose }: Props) {
             ))}
             <Pressable
               className="mt-3 items-center rounded-xl bg-muted py-3 active:opacity-90"
-              onPress={() => setLanguageOpen(false)}>
+              onPress={() => setLanguageOpen(false)}
+            >
+              <Text className="font-semibold text-foreground">
+                {t('settings.close')}
+              </Text>
+            </Pressable>
+          </Pressable>
+        </Pressable>
+      </Modal>
+
+      <Modal
+        visible={currencyOpen}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setCurrencyOpen(false)}
+      >
+        <Pressable
+          className="flex-1 justify-end bg-black/50"
+          onPress={() => setCurrencyOpen(false)}
+        >
+          <Pressable
+            className="rounded-t-3xl border-t border-border bg-card px-4 pt-2 pb-6"
+            onPress={e => e.stopPropagation()}
+            style={{ paddingBottom: Math.max(insets.bottom, 16) }}
+          >
+            <Text className="mb-4 text-center text-lg font-semibold text-card-foreground">
+              {t('settings.currencyTitle')}
+            </Text>
+            {(['EUR', 'USD', 'VND'] as const).map(p => (
+              <Pressable
+                key={p}
+                accessibilityRole="button"
+                onPress={() => {
+                  setCurrencyPreference(p);
+                  setCurrencyOpen(false);
+                }}
+                className="flex-row items-center justify-between border-b border-border py-4 active:opacity-80"
+              >
+                <Text className="text-[17px] text-card-foreground">
+                  {labelForCurrencyPref(p, t)}
+                </Text>
+                {currencyPreference === p ? (
+                  <Text className="text-lg text-primary">✓</Text>
+                ) : null}
+              </Pressable>
+            ))}
+            <Pressable
+              className="mt-3 items-center rounded-xl bg-muted py-3 active:opacity-90"
+              onPress={() => setCurrencyOpen(false)}
+            >
               <Text className="font-semibold text-foreground">
                 {t('settings.close')}
               </Text>
@@ -442,14 +538,17 @@ export function SettingsScreen({ onLogout, onClose }: Props) {
         visible={showLogout}
         transparent
         animationType="fade"
-        onRequestClose={() => setShowLogout(false)}>
+        onRequestClose={() => setShowLogout(false)}
+      >
         <Pressable
           className="flex-1 justify-center bg-black/50 px-6"
-          onPress={() => setShowLogout(false)}>
+          onPress={() => setShowLogout(false)}
+        >
           <Pressable
             className="rounded-2xl bg-card p-6"
-            onPress={(e) => e.stopPropagation()}
-            style={{ marginBottom: insets.bottom }}>
+            onPress={e => e.stopPropagation()}
+            style={{ marginBottom: insets.bottom }}
+          >
             <Text className="text-center text-lg font-bold text-card-foreground">
               {t('settings.logOutConfirmTitle')}
             </Text>
@@ -460,15 +559,17 @@ export function SettingsScreen({ onLogout, onClose }: Props) {
               <Pressable
                 accessibilityRole="button"
                 className="flex-1 items-center rounded-xl border-2 border-primary py-3 active:opacity-90"
-                onPress={() => setShowLogout(false)}>
+                onPress={() => setShowLogout(false)}
+              >
                 <Text className="font-semibold text-primary">
                   {t('settings.cancel')}
                 </Text>
               </Pressable>
               <Pressable
                 accessibilityRole="button"
-                className="flex-1 items-center rounded-xl bg-primary py-3 active:opacity-90"
-                onPress={confirmLogout}>
+                className="flex-1 items-center rounded-xl bg-green-600  py-3 active:opacity-90"
+                onPress={confirmLogout}
+              >
                 <Text className="font-semibold text-primary-foreground">
                   {t('settings.logOut')}
                 </Text>

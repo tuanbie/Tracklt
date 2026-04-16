@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import {
   Alert,
+  Image,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -29,8 +30,8 @@ type Props = {
 
 export function LoginScreen({ onGoToSignUp }: Props) {
   const { t } = useI18n();
-  const login = useAuthStore((s) => s.login);
-  const loginAsGuest = useAuthStore((s) => s.loginAsGuest);
+  const login = useAuthStore(s => s.login);
+  const loginAsGuest = useAuthStore(s => s.loginAsGuest);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -48,7 +49,7 @@ export function LoginScreen({ onGoToSignUp }: Props) {
     login({
       displayName: handle
         .replace(/[._]/g, ' ')
-        .replace(/\b\w/g, (c) => c.toUpperCase()),
+        .replace(/\b\w/g, c => c.toUpperCase()),
       email: trimmed,
       authProvider: 'email',
     });
@@ -70,10 +71,7 @@ export function LoginScreen({ onGoToSignUp }: Props) {
       });
     } catch (e) {
       const msg = e instanceof Error ? e.message : 'unknown';
-      Alert.alert(
-        t('drive.errorTitle'),
-        getGoogleSignInUserMessage(msg, t),
-      );
+      Alert.alert(t('drive.errorTitle'), getGoogleSignInUserMessage(msg, t));
     } finally {
       setBusy(false);
     }
@@ -95,7 +93,10 @@ export function LoginScreen({ onGoToSignUp }: Props) {
       });
     } catch (e) {
       const msg = e instanceof Error ? e.message : 'unknown';
-      if (msg === 'apple_signin_ios_only' || msg === 'apple_signin_unsupported') {
+      if (
+        msg === 'apple_signin_ios_only' ||
+        msg === 'apple_signin_unsupported'
+      ) {
         Alert.alert(t('drive.errorTitle'), t('drive.errorIosOnly'));
       } else {
         Alert.alert(t('drive.errorTitle'), t('drive.errorGeneric'));
@@ -108,7 +109,8 @@ export function LoginScreen({ onGoToSignUp }: Props) {
   return (
     <KeyboardAvoidingView
       className="flex-1 bg-white dark:bg-background"
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+    >
       <StatusBar
         barStyle={resolved === 'dark' ? 'light-content' : 'dark-content'}
       />
@@ -118,10 +120,19 @@ export function LoginScreen({ onGoToSignUp }: Props) {
           flexGrow: 1,
           paddingBottom: Math.max(insets.bottom, 20),
         }}
-        showsVerticalScrollIndicator={false}>
-        <View className="min-h-[32%] items-center justify-center bg-sky-100 dark:bg-sky-950/40">
-          <View className="h-28 w-36 items-center justify-center rounded-2xl bg-slate-200/90 dark:bg-slate-700">
-            <Text className="text-3xl opacity-50">🖼️</Text>
+        showsVerticalScrollIndicator={false}
+      >
+        <View className="min-h-[25%] items-center justify-center bg-sky-100 dark:bg-sky-950/40">
+          <View className=" items-center justify-center  bg-slate-200/90 dark:bg-slate-700">
+            <Image
+              source={require('../../../assets/image/logo/welcome.png')}
+              style={{
+                width: '100%',
+                height: undefined,
+                aspectRatio: 16 / 9,
+              }}
+              resizeMode="contain"
+            />
           </View>
         </View>
 
@@ -157,9 +168,12 @@ export function LoginScreen({ onGoToSignUp }: Props) {
               className="flex-1 px-4 py-3.5 text-base text-foreground"
             />
             <Pressable
-              accessibilityLabel={showPassword ? 'Hide password' : 'Show password'}
-              onPress={() => setShowPassword((s) => !s)}
-              className="px-4 py-3">
+              accessibilityLabel={
+                showPassword ? 'Hide password' : 'Show password'
+              }
+              onPress={() => setShowPassword(s => !s)}
+              className="px-4 py-3"
+            >
               <Text className="text-lg text-muted-foreground">
                 {showPassword ? '🙈' : '👁'}
               </Text>
@@ -175,8 +189,9 @@ export function LoginScreen({ onGoToSignUp }: Props) {
           <Pressable
             accessibilityRole="button"
             disabled={busy}
-            className="mt-8 items-center rounded-xl bg-primary py-4 active:opacity-90"
-            onPress={handleLogin}>
+            className="mt-8 items-center rounded-xl bg-green-600  py-4 active:opacity-90"
+            onPress={handleLogin}
+          >
             <Text className="text-base font-semibold text-primary-foreground">
               {t('auth.login')}
             </Text>
@@ -197,7 +212,8 @@ export function LoginScreen({ onGoToSignUp }: Props) {
             accessibilityRole="button"
             disabled={busy}
             className="mt-6 items-center rounded-xl border-2 border-border py-3.5 active:opacity-90"
-            onPress={() => loginAsGuest()}>
+            onPress={() => loginAsGuest()}
+          >
             <Text className="text-base font-semibold text-foreground">
               {t('auth.guestContinue')}
             </Text>
@@ -211,14 +227,16 @@ export function LoginScreen({ onGoToSignUp }: Props) {
               accessibilityLabel="Google"
               disabled={busy}
               onPress={onGoogle}
-              className="h-12 w-12 items-center justify-center rounded-full bg-[#EA4335] active:opacity-90">
+              className="h-12 w-12 items-center justify-center rounded-full bg-[#EA4335] active:opacity-90"
+            >
               <Text className="text-lg font-bold text-white">G</Text>
             </Pressable>
             <Pressable
               accessibilityLabel="Apple"
               disabled={busy}
               onPress={onApple}
-              className="h-12 w-12 items-center justify-center rounded-full bg-black active:opacity-90">
+              className="h-12 w-12 items-center justify-center rounded-full bg-black active:opacity-90"
+            >
               <Text className="text-lg font-semibold text-white">A</Text>
             </Pressable>
           </View>
